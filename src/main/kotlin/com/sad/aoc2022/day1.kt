@@ -7,4 +7,7 @@ fun main() {
 
     // part 1
     println(input.map { it.sum() }.maxOf(Long::toDouble).toLong())
+
+    // part 2
+    println(input.map { it.sum() }.sortedDescending().take(3).sum())
 }
