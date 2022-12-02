@@ -25,7 +25,7 @@ enum class Result(val score: Int, val alias: Char) {
         private val cache = mutableMapOf<Char, Result>()
 
         init {
-            for (res in Result.values()) {
+            for (res in values()) {
                 cache[res.alias] = res
             }
         }
