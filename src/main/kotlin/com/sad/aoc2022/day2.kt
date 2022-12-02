@@ -18,8 +18,20 @@ enum class Shape(val aliases: List<Char>, val score: Int) {
     }
 }
 
-enum class Result(val score: Int) {
-    WIN(6), LOSE(0), DRAW(3)
+enum class Result(val score: Int, val alias: Char) {
+    WIN(6, 'Z'), LOSE(0, 'X'), DRAW(3, 'Y');
+
+    companion object {
+        private val cache = mutableMapOf<Char, Result>()
+
+        init {
+            for (res in Result.values()) {
+                cache[res.alias] = res
+            }
+        }
+
+        fun getByAlias(alias: Char): Result? = cache[alias]
+    }
 }
 
 private fun result(otherShape: Shape, myShape: Shape): Result {
@@ -42,6 +54,30 @@ private fun score(otherShape: Shape, myShape: Shape): Int {
     return myShape.score + result(otherShape, myShape).score
 }
 
+private fun chooseShape(otherShape: Shape, neededResult: Result): Shape {
+    if (neededResult == Result.DRAW) {
+        return otherShape
+    } else {
+        if (neededResult == Result.WIN) {
+            return when (otherShape) {
+                Shape.ROCK -> Shape.PAPER
+                Shape.SCISSORS -> Shape.ROCK
+                Shape.PAPER -> Shape.SCISSORS
+            }
+        } else {
+            return when (otherShape) {
+                Shape.PAPER -> Shape.ROCK
+                Shape.ROCK -> Shape.SCISSORS
+                Shape.SCISSORS -> Shape.PAPER
+            }
+        }
+    }
+}
+
+private fun score2(otherShape: Shape, neededResult: Result): Int {
+    return score(otherShape, chooseShape(otherShape, neededResult))
+}
+
 fun main() {
     val input = loadFromResources("day2.txt").readLines().map {
         it.split(' ').map { s -> Shape.getByAlias(s[0])!! }
@@ -49,4 +85,11 @@ fun main() {
 
     // part 1
     println(input.map { score(it[0], it[1]) }.sum())
+
+    // part 2
+    val input2 = loadFromResources("day2.txt").readLines().map {
+        val spl = it.split(' ')
+        Pair(Shape.getByAlias(spl[0][0])!!, Result.getByAlias(spl[1][0])!!)
+    }
+    println(input2.map { score2(it.first, it.second) }.sum())
 }
