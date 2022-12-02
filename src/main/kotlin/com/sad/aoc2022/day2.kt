@@ -34,19 +34,23 @@ enum class Result(val score: Int, val alias: Char) {
     }
 }
 
+private val winMoves: Map<Shape, Shape> = mapOf(
+    Shape.SCISSORS to Shape.ROCK,
+    Shape.PAPER to Shape.SCISSORS,
+    Shape.ROCK to Shape.PAPER
+)
+
+private val loseMoves = mutableMapOf<Shape, Shape>().apply {
+    val thisMap = this
+    winMoves.forEach { (k, v) -> thisMap[v] = k }
+}
+
 private fun result(otherShape: Shape, myShape: Shape): Result {
     if (myShape == otherShape) {
         return Result.DRAW
     } else {
-        if (myShape == Shape.ROCK && otherShape == Shape.SCISSORS) {
-            return Result.WIN
-        } else if (myShape == Shape.SCISSORS && otherShape == Shape.PAPER) {
-            return Result.WIN
-        } else if (myShape == Shape.PAPER && otherShape == Shape.ROCK) {
-            return Result.WIN
-        } else {
-            return Result.LOSE
-        }
+        val winningShape = winMoves[otherShape]!!
+        return if (myShape == winningShape) Result.WIN else Result.LOSE
     }
 }
 
@@ -59,17 +63,9 @@ private fun chooseShape(otherShape: Shape, neededResult: Result): Shape {
         return otherShape
     } else {
         if (neededResult == Result.WIN) {
-            return when (otherShape) {
-                Shape.ROCK -> Shape.PAPER
-                Shape.SCISSORS -> Shape.ROCK
-                Shape.PAPER -> Shape.SCISSORS
-            }
+            return winMoves[otherShape]!!
         } else {
-            return when (otherShape) {
-                Shape.PAPER -> Shape.ROCK
-                Shape.ROCK -> Shape.SCISSORS
-                Shape.SCISSORS -> Shape.PAPER
-            }
+            return loseMoves[otherShape]!!
         }
     }
 }
@@ -79,11 +75,10 @@ private fun score2(otherShape: Shape, neededResult: Result): Int {
 }
 
 fun main() {
+    // part 1
     val input = loadFromResources("day2.txt").readLines().map {
         it.split(' ').map { s -> Shape.getByAlias(s[0])!! }
     }
-
-    // part 1
     println(input.map { score(it[0], it[1]) }.sum())
 
     // part 2
