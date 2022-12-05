@@ -33,4 +33,15 @@ fun main() {
     println(target.map { it[0] }.joinToString(separator = ""))
 
     // part 2
+    val target2 = stacks.map { it.toMutableList() }
+    instructions.forEach { (num, from, to) ->
+        val tempList = mutableListOf<Char>()
+        for (i in 0 until num) {
+            tempList.add(target2[from - 1].removeFirst())
+        }
+        for (i in tempList.size - 1 downTo 0) {
+            target2[to - 1].add(0, tempList[i])
+        }
+    }
+    println(target2.map { it[0] }.joinToString(separator = ""))
 }
