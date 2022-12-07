@@ -60,10 +60,23 @@ fun main() {
     val dirs = process(input)
     var res = 0L
     for(d in dirs.values) {
-//        println("${d} -> ${d.size}")
         if (d.size <= 100000) {
             res += d.size
         }
     }
     println(res)
+
+    // part 2
+    val used = dirs[listOf("/").toString()]!!.size
+    val free = 70000000 - used
+    val needToFree = 30000000 - free
+    println(needToFree)
+    val sortedDirs = dirs.values.toList().sortedBy { it.size }
+    for(d in sortedDirs) {
+        if (d.size >= needToFree) {
+            println("${d.name}: ${d.size}")
+            break
+        }
+    }
+
 }
