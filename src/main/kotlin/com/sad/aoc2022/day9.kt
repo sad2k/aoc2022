@@ -29,13 +29,7 @@ fun follow(head: Coordinates, tail: Coordinates): Coordinates? {
     return newTail
 }
 
-fun main() {
-    val input = loadFromResources("day9.txt").readLines().map {
-        val (dir, num) = it.split(" ")
-        Direction.valueOf(dir) to num.toInt()
-    }
-
-    // part 1
+private fun part1(input: List<Pair<Direction, Int>>) {
     val tailPositions = mutableSetOf<Coordinates>()
     var head = Coordinates(0, 0)
     var tail = Coordinates(0, 0)
@@ -52,6 +46,43 @@ fun main() {
         }
     }
     println(tailPositions.size)
+}
+
+private fun part2(input: List<Pair<Direction, Int>>) {
+    val tailPositions = mutableSetOf<Coordinates>()
+    var head = Coordinates(0, 0)
+    var knots = MutableList(9) { Coordinates(0, 0) }
+    tailPositions.add(knots[8])
+    for ((dir, num) in input) {
+        val offset = dir.offset
+        for (i in 1..num) {
+            head += offset
+            var prev: Coordinates = head
+            for (k in 0 until knots.size) {
+                val newKnot = follow(prev, knots[k])
+                if (newKnot != null) {
+                    knots[k] = newKnot
+                    if (k == 8) {
+                        tailPositions.add(newKnot)
+                    }
+                }
+                prev = knots[k]
+            }
+        }
+    }
+    println(tailPositions.size)
+}
+
+fun main() {
+    val input = loadFromResources("day9.txt").readLines().map {
+        val (dir, num) = it.split(" ")
+        Direction.valueOf(dir) to num.toInt()
+    }
+
+    // part 1
+    part1(input)
 
     // part 2
+    part2(input)
 }
+
