@@ -43,9 +43,12 @@ private fun toMonkey(lines: List<String>): Monkey {
     return Monkey(startingItems, op, leftOp, rightOp, divisibleBy, trueMonkey, falseMonkey)
 }
 
-private fun part1(monkeys: List<Monkey>) {
-    val inspectedCounts = monkeys.map { 0 }.toMutableList()
-    for (round in 1..20) {
+private fun solve(monkeys: List<Monkey>, part: Int) {
+    val inspectedCounts = monkeys.map { 0L }.toMutableList()
+    val divisibleByProduct = monkeys.map(Monkey::divisibleBy).reduce { acc, i -> acc * i }
+    println(divisibleByProduct)
+    val rounds = if (part == 1) 20 else 10000
+    for (round in 1..rounds) {
         for ((monkeyIdx, monkey) in monkeys.withIndex()) {
             for (item in monkey.items) {
                 inspectedCounts[monkeyIdx]++
@@ -53,7 +56,11 @@ private fun part1(monkeys: List<Monkey>) {
                 val left = if (monkey.leftOp == -1L) item else monkey.leftOp
                 val right = if (monkey.rightOp == -1L) item else monkey.rightOp
                 var newLevel = if (monkey.op == '*') left * right else left + right
-                newLevel /= 3
+                if (part == 1) {
+                    newLevel /= 3
+                } else {
+                    newLevel %= divisibleByProduct
+                }
                 if (newLevel % monkey.divisibleBy == 0L) {
                     monkeys[monkey.trueMonkey].items.add(newLevel)
                 } else {
@@ -63,7 +70,7 @@ private fun part1(monkeys: List<Monkey>) {
             monkey.items.clear()
         }
     }
-    println(inspectedCounts.sortedDescending().take(2).fold(1) { acc, i -> acc * i })
+    println(inspectedCounts.sortedDescending().take(2).reduce { acc, i -> acc * i })
 }
 
 fun main() {
@@ -71,6 +78,9 @@ fun main() {
     val monkeys = input.map(::toMonkey).toList()
 
     // part 1
-    part1(monkeys)
+    solve(monkeys, 1)
+
+    // part 2
+    solve(monkeys, 2)
 }
 
