@@ -2,7 +2,7 @@ package com.sad.aoc2022
 
 data class Monkey(
     val items: MutableList<Long>, val op: Char, val leftOp: Long, val rightOp: Long, val divisibleBy: Long,
-    val trueMonkey: Int, val falseMonkey: Int
+    val trueMonkey: Int, val falseMonkey: Int, var inspectionCount: Long
 )
 
 private fun toMonkey(lines: List<String>): Monkey {
@@ -40,27 +40,25 @@ private fun toMonkey(lines: List<String>): Monkey {
             }
         }
     }
-    return Monkey(startingItems, op, leftOp, rightOp, divisibleBy, trueMonkey, falseMonkey)
+    return Monkey(startingItems, op, leftOp, rightOp, divisibleBy, trueMonkey, falseMonkey, 0L)
 }
 
-private fun solve(monkeys: List<Monkey>, part: Int) {
-    val inspectedCounts = monkeys.map { 0L }.toMutableList()
+private fun solve(monkeys: List<Monkey>, rounds: Int, worryReducingFactor: Long) {
+    monkeys.forEach {
+        it.inspectionCount = 0
+    }
     val divisibleByProduct = monkeys.map(Monkey::divisibleBy).reduce { acc, i -> acc * i }
     println(divisibleByProduct)
-    val rounds = if (part == 1) 20 else 10000
-    for (round in 1..rounds) {
-        for ((monkeyIdx, monkey) in monkeys.withIndex()) {
+    repeat(rounds) {
+        for (monkey in monkeys) {
             for (item in monkey.items) {
-                inspectedCounts[monkeyIdx]++
+                monkey.inspectionCount++
                 // new level
                 val left = if (monkey.leftOp == -1L) item else monkey.leftOp
                 val right = if (monkey.rightOp == -1L) item else monkey.rightOp
                 var newLevel = if (monkey.op == '*') left * right else left + right
-                if (part == 1) {
-                    newLevel /= 3
-                } else {
-                    newLevel %= divisibleByProduct
-                }
+                newLevel /= worryReducingFactor
+                newLevel %= divisibleByProduct
                 if (newLevel % monkey.divisibleBy == 0L) {
                     monkeys[monkey.trueMonkey].items.add(newLevel)
                 } else {
@@ -70,7 +68,7 @@ private fun solve(monkeys: List<Monkey>, part: Int) {
             monkey.items.clear()
         }
     }
-    println(inspectedCounts.sortedDescending().take(2).reduce { acc, i -> acc * i })
+    println(monkeys.map { it.inspectionCount }.sortedDescending().take(2).reduce { acc, i -> acc * i })
 }
 
 fun main() {
@@ -78,9 +76,9 @@ fun main() {
     val monkeys = input.map(::toMonkey).toList()
 
     // part 1
-    solve(monkeys, 1)
+    solve(monkeys, 20, 3)
 
     // part 2
-    solve(monkeys, 2)
+    solve(monkeys, 10000, 1)
 }
 
