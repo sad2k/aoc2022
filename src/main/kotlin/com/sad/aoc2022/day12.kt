@@ -1,16 +1,23 @@
 package com.sad.aoc2022
 
-import kotlin.math.min
-
-private fun isValidCoordinate(coord: Pair<Int,Int>, input: List<String>): Boolean {
-    val (row,col) = coord
+private fun isValidCoordinate(coord: Pair<Int, Int>, input: List<String>): Boolean {
+    val (row, col) = coord
     return (row >= 0 && col >= 0 && row < input.size && col < input[0].length)
 }
 
+private fun height(coord: Pair<Int, Int>, input: List<String>): Int {
+    val ch = input[coord.first][coord.second]
+    return when (ch) {
+        'S' -> 'a'.code
+        'E' -> 'z'.code
+        else -> ch.code
+    }
+}
+
 private fun bfs(startPos: Pair<Int, Int>, input: List<String>): Int? {
-    val visited = mutableSetOf<Pair<Int,Int>>()
-    val queue = ArrayDeque<Pair<Int,Int>>()
-    val distances = mutableMapOf<Pair<Int,Int>, Int>()
+    val visited = mutableSetOf<Pair<Int, Int>>()
+    val queue = ArrayDeque<Pair<Int, Int>>()
+    val distances = mutableMapOf<Pair<Int, Int>, Int>()
     queue.add(startPos)
     distances[startPos] = 0
     while (!queue.isEmpty()) {
@@ -31,19 +38,11 @@ private fun bfs(startPos: Pair<Int, Int>, input: List<String>): Int? {
             .filter { isValidCoordinate(it, input) }
             .filter { !visited.contains(it) }
             .filter {
-                var newChar = input[it.first][it.second]
-                if (newChar == 'E') {
-                    newChar = 'z'
-                }
-                var curChar = input[c.first][c.second]
-                if (curChar == 'S') {
-                    curChar = 'a'
-                }
-                newChar.code - curChar.code <= 1
+                height(it, input) - height(c, input) <= 1
             }
         moves.forEach {
             if (!distances.containsKey(it)) {
-                distances[it] = d!!+1
+                distances[it] = d!! + 1
             }
             queue.add(it)
         }
