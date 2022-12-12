@@ -14,7 +14,9 @@ private fun height(coord: Pair<Int, Int>, input: List<String>): Int {
     }
 }
 
-private fun bfs(startPos: Pair<Int, Int>, input: List<String>, predicate: (Pair<Int, Int>) -> Boolean): Int? {
+private fun bfs(
+    startPos: Pair<Int, Int>, input: List<String>, goingBack: Boolean, predicate: (Pair<Int, Int>) -> Boolean
+): Int? {
     val visited = mutableSetOf<Pair<Int, Int>>()
     val queue = ArrayDeque<Pair<Int, Int>>()
     val distances = mutableMapOf<Pair<Int, Int>, Int>()
@@ -38,7 +40,7 @@ private fun bfs(startPos: Pair<Int, Int>, input: List<String>, predicate: (Pair<
             .filter { isValidCoordinate(it, input) }
             .filter { !visited.contains(it) }
             .filter {
-                height(it, input) - height(c, input) <= 1
+                (height(it, input) - height(c, input)) * (if (goingBack) (-1) else (1)) <= 1
             }
         moves.forEach {
             if (!distances.containsKey(it)) {
@@ -51,21 +53,31 @@ private fun bfs(startPos: Pair<Int, Int>, input: List<String>, predicate: (Pair<
     return null
 }
 
+private fun findPos(ch: Char, input: List<String>): Pair<Int, Int> {
+    var pos: Pair<Int, Int>? = null
+    for (row in input.indices) {
+        for (col in input[row].indices) {
+            if (input[row][col] == ch) {
+                pos = row to col
+            }
+        }
+    }
+    return pos!!
+}
+
 fun main() {
     val input = loadFromResources("day12.txt").readLines()
 
     // part 1
-    var startPos: Pair<Int, Int>? = null
-    for (row in input.indices) {
-        for (col in input[row].indices) {
-            if (input[row][col] == 'S') {
-                startPos = row to col
-            }
-        }
-    }
-    check(startPos != null)
-    println(bfs(startPos, input) {
+    var startPos = findPos('S', input)
+    println(bfs(startPos, input, false) {
         input[it.first][it.second] == 'E'
+    })
+
+    // part 2
+    startPos = findPos('E', input)
+    println(bfs(startPos, input, true) {
+        height(it, input) == 'a'.code
     })
 
 }
