@@ -6,7 +6,7 @@ data class Monkey(
 )
 
 private fun toMonkey(lines: List<String>): Monkey {
-    var startingItems = mutableListOf<Long>()
+    val startingItems = mutableListOf<Long>()
     var op = '?'
     var leftOp = -1L
     var rightOp = -1L
@@ -44,12 +44,8 @@ private fun toMonkey(lines: List<String>): Monkey {
 }
 
 private fun solve(monkeys: List<Monkey>, rounds: Int, worryReducingFactor: Long) {
-    monkeys.forEach {
-        it.inspectionCount = 0
-    }
     val divisibleByProduct = monkeys.map(Monkey::divisibleBy).reduce { acc, i -> acc * i }
-    println(divisibleByProduct)
-    repeat(rounds) {
+    for(round in 1..rounds) {
         for (monkey in monkeys) {
             for (item in monkey.items) {
                 monkey.inspectionCount++
@@ -73,12 +69,11 @@ private fun solve(monkeys: List<Monkey>, rounds: Int, worryReducingFactor: Long)
 
 fun main() {
     val input = loadFromResources("day11.txt").readLines().splitWhen { it.isBlank() }
-    val monkeys = input.map(::toMonkey).toList()
 
     // part 1
-    solve(monkeys, 20, 3)
+    solve(input.map(::toMonkey).toList(), 20, 3)
 
     // part 2
-    solve(monkeys, 10000, 1)
+    solve(input.map(::toMonkey).toList(), 10000, 1)
 }
 
