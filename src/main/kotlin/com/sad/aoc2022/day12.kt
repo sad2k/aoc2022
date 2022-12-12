@@ -14,7 +14,7 @@ private fun height(coord: Pair<Int, Int>, input: List<String>): Int {
     }
 }
 
-private fun bfs(startPos: Pair<Int, Int>, input: List<String>): Int? {
+private fun bfs(startPos: Pair<Int, Int>, input: List<String>, predicate: (Pair<Int, Int>) -> Boolean): Int? {
     val visited = mutableSetOf<Pair<Int, Int>>()
     val queue = ArrayDeque<Pair<Int, Int>>()
     val distances = mutableMapOf<Pair<Int, Int>, Int>()
@@ -26,7 +26,7 @@ private fun bfs(startPos: Pair<Int, Int>, input: List<String>): Int? {
             continue
         }
         val d = distances[c]
-        if (input[c.first][c.second] == 'E') {
+        if (predicate(c)) {
             return d
         }
         val moves = listOf(
@@ -64,5 +64,8 @@ fun main() {
         }
     }
     check(startPos != null)
-    println(bfs(startPos, input))
+    println(bfs(startPos, input) {
+        input[it.first][it.second] == 'E'
+    })
+
 }
