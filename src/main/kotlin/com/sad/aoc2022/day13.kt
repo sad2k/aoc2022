@@ -66,7 +66,7 @@ enum class CompareResult {
     IN_ORDER, OUT_OF_ORDER, CHECK_NEXT
 }
 
-private fun compare(p1: Packet, p2: Packet): CompareResult {
+private fun cmp(p1: Packet, p2: Packet): CompareResult {
     if (p1 is IntPacket && p2 is IntPacket) {
         if (p1.value < p2.value) {
             return CompareResult.IN_ORDER
@@ -76,9 +76,9 @@ private fun compare(p1: Packet, p2: Packet): CompareResult {
             return CompareResult.CHECK_NEXT
         }
     } else if (p1 is IntPacket && p2 is ListPacket) {
-        return compare(ListPacket(mutableListOf(p1)), p2)
+        return cmp(ListPacket(mutableListOf(p1)), p2)
     } else if (p1 is ListPacket && p2 is IntPacket) {
-        return compare(p1, ListPacket(mutableListOf(p2)))
+        return cmp(p1, ListPacket(mutableListOf(p2)))
     } else if (p1 is ListPacket && p2 is ListPacket) {
         // the main check - two lists
         val maxNum = max(p1.list.size, p2.list.size)
@@ -90,7 +90,7 @@ private fun compare(p1: Packet, p2: Packet): CompareResult {
                 // right ran out of items
                 return CompareResult.OUT_OF_ORDER
             }
-            when (compare(p1.list[i], p2.list[i])) {
+            when (cmp(p1.list[i], p2.list[i])) {
                 CompareResult.IN_ORDER -> {
                     return CompareResult.IN_ORDER
                 }
@@ -109,14 +109,45 @@ private fun compare(p1: Packet, p2: Packet): CompareResult {
 }
 
 fun main() {
+    // part 1
     val input = loadFromResources("day13.txt").readLines().splitWhen { it.isBlank() }.map {
         it.map { s -> parse(s) }
     }
-
-    // part 1
     println(input.mapIndexed { i, it ->
-        i to compare(it[0], it[1])
+        i to cmp(it[0], it[1])
     }.filter {
         it.second == CompareResult.IN_ORDER
-    }.fold (0) { acc, v -> acc + v.first + 1 })
+    }.fold(0) { acc, v -> acc + v.first + 1 })
+
+    // part 2
+    val input2 = loadFromResources("day13.txt").readLines().filter { it.isNotBlank() }.map { s ->
+        parse(s)
+    } + listOf(
+        ListPacket(mutableListOf(ListPacket(mutableListOf(IntPacket(2))))),
+        ListPacket(mutableListOf(ListPacket(mutableListOf(IntPacket(6))))),
+    )
+    val sorted = input2.sortedWith(object : Comparator<Packet> {
+        override fun compare(o1: Packet?, o2: Packet?): Int {
+            when (cmp(o1!!, o2!!)) {
+                CompareResult.IN_ORDER -> {
+                    return -1
+                }
+                CompareResult.OUT_OF_ORDER -> {
+                    return 1
+                }
+                CompareResult.CHECK_NEXT -> {
+                    return 0
+                }
+            }
+        }
+    })
+    var res = 1
+    for ((i, s) in sorted.withIndex()) {
+        if (s == ListPacket(mutableListOf(ListPacket(mutableListOf(IntPacket(2))))) ||
+            s == ListPacket(mutableListOf(ListPacket(mutableListOf(IntPacket(6)))))
+        ) {
+            res *= (i + 1)
+        }
+    }
+    println(res)
 }
