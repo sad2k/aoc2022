@@ -112,12 +112,8 @@ fun main() {
     val input = loadFromResources("day13.txt").readLines().splitWhen { it.isBlank() }.map {
         it.map { s -> parse(s) }
     }
-//    println(input)
-//    for (l in input) {
-//        println(l[0])
-//        println(l[1])
-//        println("")
-//    }
+
+    // part 1
     println(input.mapIndexed { i, it ->
         i to compare(it[0], it[1])
     }.filter {
