@@ -1,5 +1,6 @@
 package com.sad.aoc2022
 
+import java.lang.IllegalStateException
 import kotlin.math.max
 import kotlin.math.min
 
@@ -34,10 +35,13 @@ private fun checkPosition(grid: MutableList<MutableList<Char>>, pos: List<Int>):
     return grid[y][x]
 }
 
-private fun cycle(grid: MutableList<MutableList<Char>>, pos: List<Int>): Boolean {
+private fun cycle(grid: MutableList<MutableList<Char>>, pos: List<Int>, allowOutside: Boolean): Boolean {
     var (x, y) = pos
     while (true) {
         if (x < 0 || x >= grid[0].size || y == grid.size) {
+            if (!allowOutside) {
+                throw IllegalStateException("not allowed to go outside the grid")
+            }
             return false
         }
         if (checkPosition(grid, listOf(x,y+1)) == '.') {
@@ -61,14 +65,7 @@ private fun printGrid(grid: MutableList<MutableList<Char>>) {
     }
 }
 
-fun main() {
-    val input = loadFromResources("day14.txt").readLines().map {
-        it.split(" -> ").map { pair ->
-            pair.split(",").map { s -> s.toInt() }
-        }
-    }
-
-    // part 1
+private fun part1(input: List<List<List<Int>>>) {
     var minx = Integer.MAX_VALUE
     var miny = 0
     var maxx = 0
@@ -90,12 +87,65 @@ fun main() {
 //    printGrid(grid)
     val fallStart = listOf(500 - minx, 0)
     var cycles = 0
-    while(cycle(grid, fallStart)) {
+    while (cycle(grid, fallStart, true)) {
         cycles++
     }
 //    printGrid(grid)
     println(cycles)
 }
+
+private fun part2(input: List<List<List<Int>>>) {
+    var minx = Integer.MAX_VALUE
+    var miny = 0
+    var maxx = 0
+    var maxy = 0
+    input.forEach {
+        it.forEach { (x, y) ->
+            minx = min(x, minx)
+            maxx = max(x, maxx)
+            maxy = max(y, maxy)
+        }
+    }
+    maxy += 2
+    minx = 500 - (maxy - miny)
+    maxx = 500 + (maxy - miny)
+    val grid = MutableList(maxy - miny + 1) { MutableList(maxx - minx + 1) { '.' } }
+    input.forEach {
+        it.windowed(2, 1).map { (start, end) ->
+            fill(grid, start, end, minx)
+        }
+    }
+    fill(grid, listOf(minx, maxy), listOf(maxx, maxy), minx)
+//    printGrid(grid)
+    val fallStart = listOf(500 - minx, 0)
+    var cycles = 0
+    while (cycle(grid, fallStart, true)) {
+        cycles++
+        if (grid[fallStart[1]][fallStart[0]] == 'o') {
+            break
+        }
+    }
+//    printGrid(grid)
+    println(cycles)
+}
+
+fun main() {
+    val input = loadFromResources("day14.txt").readLines().map {
+        it.split(" -> ").map { pair ->
+            pair.split(",").map { s -> s.toInt() }
+        }
+    }
+
+    // part 1
+    part1(input)
+
+    // part 2
+    part2(input)
+}
+
+
+
+
 
 
 
