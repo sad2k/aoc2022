@@ -1,5 +1,6 @@
 package com.sad.aoc2022
 
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -52,6 +53,60 @@ private fun part1(
     println(grid.count { it == '#' })
 }
 
+fun drawArea2(grid: MutableList<Char>, sensor: Pair<Int, Int>, distance: Int, targety: Int) {
+    if (targety in sensor.second - distance..sensor.second + distance) {
+        val ydistance = abs(sensor.second - targety)
+        for (x in max(sensor.first - distance + ydistance, 0)..min(sensor.first + distance - ydistance, grid.size - 1)) {
+//            if (distance(sensor, x to targety) <= distance && grid[x] == '.') {
+                grid[x] = '#'
+//            }
+        }
+    }
+}
+
+fun part2(minx: Int, sensors: List<Pair<Int, Int>>, beacons: List<Pair<Int, Int>>) {
+    val maxDim = 4000000
+//    val maxDim = 20
+
+    val grid = MutableList(maxDim + 1) { '.' }
+    val distances = (sensors zip beacons).map {
+        (s,z) -> distance(s,z)
+    }
+    var t = System.currentTimeMillis()
+    for (targety in 0..maxDim) {
+        if (targety % 100 == 0) {
+            val nt = System.currentTimeMillis()
+            val diff = nt - t
+            t = nt
+            println("y = ${targety}, seconds = ${TimeUnit.MILLISECONDS.toSeconds(diff)}")
+        }
+        grid.fill('.')
+        for(i in sensors.indices) {
+            val sensor = sensors[i]
+            val beacon = beacons[i]
+            if (sensor.second == targety && sensor.first in 0..maxDim) {
+                grid[sensor.first] = 'S'
+            }
+            if (beacon.second == targety && beacon.first in 0..maxDim) {
+                grid[beacon.first] = 'B'
+            }
+        }
+        for(i in sensors.indices) {
+            val sensor = sensors[i]
+//            val beacon = beacons[i]
+            val distance = distances[i]
+            drawArea2(grid, sensor, distance, targety)
+        }
+//        println(grid.joinToString(separator = ""))
+        val idx = grid.indexOf('.')
+        if (idx != -1) {
+            println("${idx},${targety}")
+            println("freq = ${idx * 4000000 + targety}")
+            break
+        }
+    }
+}
+
 fun main() {
     val input = loadFromResources("day15.txt").readLines().map {
         val spl = it.split(" ")
@@ -88,8 +143,13 @@ fun main() {
     }
     println("minx: ${minx} maxx: ${maxx} miny: ${miny} maxy: ${maxy}")
 
-    part1(maxx, minx, sensors, beacons)
+    // part 1
+//    part1(maxx, minx, sensors, beacons)
+
+    // part 2
+    part2(minx, sensors, beacons)
 }
+
 
 
 
