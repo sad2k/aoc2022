@@ -53,56 +53,69 @@ private fun part1(
     println(grid.count { it == '#' })
 }
 
-fun drawArea2(grid: Array<Char>, sensor: Pair<Int, Int>, distance: Int, targety: Int) {
-    if (targety in sensor.second - distance..sensor.second + distance) {
-        val ydistance = abs(sensor.second - targety)
-        for (x in max(sensor.first - distance + ydistance, 0)..min(
-            sensor.first + distance - ydistance,
-            grid.size - 1
-        )) {
-            grid[x] = '#'
+private fun Iterable<IntRange>.union(): List<IntRange> = sortedBy { it.first }.fold(mutableListOf()) { acc, current ->
+    if (acc.isEmpty()) {
+        acc.add(current)
+    } else {
+        val last = acc.last()
+        if (current.first <= last.last) {
+            acc[acc.lastIndex] = last.first..maxOf(current.last, last.last)
+        } else {
+            acc.add(current)
         }
     }
+    acc
 }
 
-fun part2(minx: Int, sensors: List<Pair<Int, Int>>, beacons: List<Pair<Int, Int>>) {
+private fun Iterable<IntRange>.findGapIndex(): Int? {
+    var prev: IntRange? = null
+    for (iv in this) {
+        if (prev != null) {
+            if (iv.first - prev.last >= 2) {
+                return prev.last + 1
+            }
+        }
+        prev = iv
+    }
+    return null
+}
+
+fun part2(sensors: List<Pair<Int, Int>>, beacons: List<Pair<Int, Int>>) {
     val maxDim = 4000000
 //    val maxDim = 20
-    val grid = Array(maxDim + 1) { '.' }
-    val emptyGrid = Array(maxDim + 1) { '.' }
     val distances = (sensors zip beacons).map { (s, z) ->
         distance(s, z)
     }
     var t = System.currentTimeMillis()
     for (targety in 0..maxDim) {
+        val intervals = mutableListOf<IntRange>()
         if (targety % 100 == 0) {
             val nt = System.currentTimeMillis()
             val diff = nt - t
             t = nt
             println("y = ${targety}, seconds = ${TimeUnit.MILLISECONDS.toSeconds(diff)}")
         }
-        System.arraycopy(emptyGrid, 0, grid, 0, emptyGrid.size)
-//        grid.fill('.')
-
         for (i in sensors.indices) {
             val sensor = sensors[i]
             val beacon = beacons[i]
             if (sensor.second == targety && sensor.first in 0..maxDim) {
-                grid[sensor.first] = 'S'
+                intervals += sensor.first..sensor.first
             }
             if (beacon.second == targety && beacon.first in 0..maxDim) {
-                grid[beacon.first] = 'B'
+                intervals += beacon.first..beacon.first
             }
         }
         for (i in sensors.indices) {
             val sensor = sensors[i]
             val distance = distances[i]
-            drawArea2(grid, sensor, distance, targety)
+            if (targety in sensor.second - distance..sensor.second + distance) {
+                val ydistance = abs(sensor.second - targety)
+                intervals += max(sensor.first - distance + ydistance, 0)..min(sensor.first + distance - ydistance, maxDim)
+            }
         }
-        val idx = grid.indexOf('.')
-        if (idx != -1) {
-            println("${idx},${targety}")
-            println("freq = ${idx * 4000000 + targety}")
+        val gapIdx = intervals.union().findGapIndex()
+        if (gapIdx != null) {
+            println(gapIdx * 4000000L + targety)
             break
         }
     }
@@ -148,7 +161,7 @@ fun main() {
 //    part1(maxx, minx, sensors, beacons)
 
     // part 2
-    part2(minx, sensors, beacons)
+    part2(sensors, beacons)
 }
 
 
