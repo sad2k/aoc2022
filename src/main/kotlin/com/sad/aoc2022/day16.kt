@@ -7,19 +7,11 @@ fun <T> Collection<T>.powerset(): Set<Set<T>> = when {
     else -> drop(1).powerset().let { it + it.map { it + first() } }
 }
 
-fun main() {
-    val regex = """Valve (\w+) has flow rate=(\d+); tunnel[s]? lead[s]? to valve[s]? (.+)""".toRegex()
-    val input = loadFromResources("day16.txt").readLines().map {
-        val mr = regex.find(it)
-        val (v, fr, lt) = mr!!.destructured
-        v to Pair(fr.toInt(), lt.split("\\s*,\\s*".toRegex()))
-    }.toMap()
-
+private fun part1(input: Map<String, Pair<Int, List<String>>>) {
     val allValves = input.keys.toList()
     val positionFlowValves = input.entries.filter { it.value.first > 0 }.map { it.key }
     val positionFlowValveCombinations = positionFlowValves.powerset().toList()
 
-    // part 1
     var currentDp = mutableMapOf<Pair<String, Set<String>>, Long>()
     var previousDp = mutableMapOf<Pair<String, Set<String>>, Long>()
 
@@ -39,7 +31,7 @@ fun main() {
                 if (minLeft > 0) {
                     var openScore = 0L
                     if (currentValveDef.first > 0 && !currentOpen.contains(currentPos)) {
-                        openScore = (minLeft-1) * currentValveDef.first.toLong() + previousDp[Pair(
+                        openScore = (minLeft - 1) * currentValveDef.first.toLong() + previousDp[Pair(
                             currentPos,
                             currentOpen + currentPos
                         )]!!
@@ -58,9 +50,17 @@ fun main() {
         }
     }
     println(currentDp[Pair("AA", emptySet())])
-
-//    val l = List(15) { 'A' + it }
-//    println(l)
-//    println(l.powerset().size)
-
 }
+
+fun main() {
+    val regex = """Valve (\w+) has flow rate=(\d+); tunnel[s]? lead[s]? to valve[s]? (.+)""".toRegex()
+    val input = loadFromResources("day16.txt").readLines().map {
+        val mr = regex.find(it)
+        val (v, fr, lt) = mr!!.destructured
+        v to Pair(fr.toInt(), lt.split("\\s*,\\s*".toRegex()))
+    }.toMap()
+
+    // part 1
+    part1(input)
+}
+
