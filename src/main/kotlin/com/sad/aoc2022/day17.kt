@@ -180,46 +180,29 @@ private fun part1(input: String) {
             moveIdx++
 
             // move L/R
-//            println(move)
             val moveAllowed =
                 if (move == '>') shape.canMoveRight(chamber, row, col) else shape.canMoveLeft(chamber, row, col)
             if (moveAllowed) {
-//                println("allowed")
                 // draw to L/R
                 val offset = if (move == '>') 1 else -1
                 shape.move(chamber, row, col, 0, offset)
                 col += offset
-            } else {
-//                println("not allowed")
             }
-
-//            printChamber(chamber)
-//            println("")
 
             // move down
             if (shape.canMoveDown(chamber, row, col)) {
-//                println("move down allowed")
                 shape.move(chamber, row, col, 1, 0)
                 row += 1
             } else {
                 break
             }
 
-//            printChamber(chamber)
-//            println("")
-
             // trim top row
             if (chamber[0].all { it == '.' }) {
-//                println("trim")
                 chamber.removeFirst()
                 row -= 1
             }
-
-//            printChamber(chamber)
-//            println("")
         }
-//        printChamber(chamber)
-//        println("")
     }
     println(chamber.size)
 }
