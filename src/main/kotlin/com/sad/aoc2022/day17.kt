@@ -157,12 +157,39 @@ private fun printChamber(chamber: ArrayDeque<CharArray>) {
     }
 }
 
-private fun part1(input: String) {
+private fun solve(input: String, iterations: Long, findCycle: Boolean) {
     val chamber = ArrayDeque<CharArray>()
 
     var shapeIdx = 0
     var moveIdx = 0
-    for (i in 1..2022) {
+    var trimmedAtBottom = 0
+    val cache = mutableMapOf<Triple<String,Int,Int>, Pair<Long,Int>>()
+    for (i in 1..iterations) {
+        if (findCycle) {
+            if (chamber.size >= 100) {
+                val cacheKey = Triple(
+                    chamber.subList(0, 100).map { String(it) }.joinToString(separator = ""),
+                    shapeIdx % shapes.size,
+                    moveIdx % input.length
+                )
+                if (cache.contains(cacheKey)) {
+                    println("cycle detected at ${i} (height ${chamber.size + trimmedAtBottom}) (prev = ${cache[cacheKey]})")
+                    val (prevIter, prevHeight) = cache[cacheKey]!!
+                    val cycledIterations = iterations - prevIter
+                    val cycleLength = i - prevIter
+                    val fullCyles = cycledIterations / cycleLength
+                    val cycleHeight = chamber.size + trimmedAtBottom - prevHeight
+                    val fullCycleHeight = fullCyles.toLong() * cycleHeight
+                    val remainder = cycledIterations % cycleLength
+                    println("Beginning and full cycles height = ${prevHeight + fullCycleHeight}")
+                    println("Remainder after last cycle = ${remainder}")
+                    return
+                } else {
+                    cache[cacheKey] = i to chamber.size + trimmedAtBottom
+                }
+            }
+        }
+
         val shape = shapes[shapeIdx % shapes.size]
         shapeIdx++
 
@@ -203,15 +230,29 @@ private fun part1(input: String) {
                 row -= 1
             }
         }
-    }
-    println(chamber.size)
-}
 
+        // trim at the bottom
+        if (chamber.size > 100) {
+            val toTrim = chamber.size - 100
+            for (t in 0 until toTrim) {
+                chamber.removeLast()
+            }
+            trimmedAtBottom += toTrim
+        }
+    }
+
+    println(chamber.size + trimmedAtBottom)
+}
 
 fun main() {
     val input = loadFromResources("day17.txt").readFirstLine()
 
     // part 1
-    part1(input)
+    //solve(input, 2022, false)
+
+    // part 2
+    // sorry dont have time to structure it... a bit of manual labour required in the end
+    solve(input, 1000000000000L, true)
+    solve(input, 598 + 152, false)
 }
 
