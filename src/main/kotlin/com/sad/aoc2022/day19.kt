@@ -36,29 +36,6 @@ data class Blueprint(
 
         val candidates = mutableSetOf<State>()
 
-        // is it worth waiting for something and not building anything?
-//        var shouldWait = false
-//        if (
-//            (state.ore < oreRobotCost && state.oreRobots < maxOreRobotsNeeded) ||
-//            (state.ore < clayRobotCost && state.oreRobots < clayRobotCost && state.clayRobots < maxClayRobotsNeeded) ||
-//            (state.ore < obsRobotCostOre && state.oreRobots < obsRobotCostOre && state.obsRobots < maxObsRobotsNeeded) ||
-//            (state.ore < geodeRobotCostOre && state.oreRobots < geodeRobotCostOre)
-//        ) {
-//            shouldWait = true
-//        }
-//
-//        if (state.clay < obsRobotCostClay && state.clayRobots < obsRobotCostClay && state.obsRobots < maxObsRobotsNeeded) {
-//            shouldWait = true
-//        }
-//
-//        if (state.obs < geodeRobotCostObs && state.obsRobots < geodeRobotCostObs) {
-//            shouldWait = true
-//        }
-//
-//        if (shouldWait) {
-//            candidates.add(updState)
-//        }
-
         // saving for ore robot
         if (state.ore < oreRobotCost && state.oreRobots > 0) {
             val needToWaitMins = Math.ceil((oreRobotCost - state.ore).toDouble() / state.oreRobots.toDouble()).toInt()
