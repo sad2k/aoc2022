@@ -59,31 +59,6 @@ data class Blueprint(
 //            candidates.add(updState)
 //        }
 
-        if (state.ore >= oreRobotCost && updState.oreRobots < maxOreRobotsNeeded) {
-            candidates.add(updState.copy(ore = updState.ore - oreRobotCost, oreRobots = updState.oreRobots + 1))
-        }
-        if (state.ore >= clayRobotCost && updState.clayRobots < maxClayRobotsNeeded) {
-            candidates.add(updState.copy(ore = updState.ore - clayRobotCost, clayRobots = updState.clayRobots + 1))
-        }
-        if (state.ore >= obsRobotCostOre && state.clay >= obsRobotCostClay && updState.obsRobots < maxObsRobotsNeeded) {
-            candidates.add(
-                updState.copy(
-                    ore = updState.ore - obsRobotCostOre,
-                    clay = updState.clay - obsRobotCostClay,
-                    obsRobots = updState.obsRobots + 1
-                )
-            )
-        }
-        if (state.ore >= geodeRobotCostOre && state.obs >= geodeRobotCostObs) {
-            candidates.add(
-                updState.copy(
-                    ore = updState.ore - geodeRobotCostOre,
-                    obs = updState.obs - geodeRobotCostObs,
-                    geodeRobots = updState.geodeRobots + 1
-                )
-            )
-        }
-
         // saving for ore robot
         if (state.ore < oreRobotCost && state.oreRobots > 0) {
             val needToWaitMins = Math.ceil((oreRobotCost - state.ore).toDouble() / state.oreRobots.toDouble()).toInt()
@@ -156,8 +131,34 @@ data class Blueprint(
             }
         }
 
+        if (state.ore >= oreRobotCost && updState.oreRobots < maxOreRobotsNeeded) {
+            candidates.add(updState.copy(ore = updState.ore - oreRobotCost, oreRobots = updState.oreRobots + 1))
+        }
+        if (state.ore >= clayRobotCost && updState.clayRobots < maxClayRobotsNeeded) {
+            candidates.add(updState.copy(ore = updState.ore - clayRobotCost, clayRobots = updState.clayRobots + 1))
+        }
+        if (state.ore >= obsRobotCostOre && state.clay >= obsRobotCostClay && updState.obsRobots < maxObsRobotsNeeded) {
+            candidates.add(
+                updState.copy(
+                    ore = updState.ore - obsRobotCostOre,
+                    clay = updState.clay - obsRobotCostClay,
+                    obsRobots = updState.obsRobots + 1
+                )
+            )
+        }
+        if (state.ore >= geodeRobotCostOre && state.obs >= geodeRobotCostObs) {
+            candidates.clear()
+            candidates.add(
+                updState.copy(
+                    ore = updState.ore - geodeRobotCostOre,
+                    obs = updState.obs - geodeRobotCostObs,
+                    geodeRobots = updState.geodeRobots + 1
+                )
+            )
+        }
+
         if (candidates.isEmpty()) {
-            candidates.add(updState)
+            return state.geode
         }
 
 
@@ -175,6 +176,28 @@ data class Blueprint(
 //            println("cache size is ${cache.size}")
         }
         return res
+    }
+}
+
+private fun part1(blueprints: MutableList<Blueprint>) {
+    var qsum = 0
+    blueprints.forEach {
+        val res = it.calculate(State(oreRobots = 1, minsLeft = 24))
+        val quality = res * it.id
+        println("${it} -> ${res}, quality ${quality}")
+        it.cache.clear()
+        System.gc()
+        qsum += quality
+    }
+    println("qsum ${qsum}")
+}
+
+fun part2(blueprints: MutableList<Blueprint>) {
+    blueprints.take(3).forEach {
+        val res = it.calculate(State(oreRobots = 1, minsLeft = 32))
+        println("${it} -> ${res}")
+        it.cache.clear()
+        System.gc()
     }
 }
 
@@ -231,14 +254,11 @@ fun main() {
     }
 
     // part 1
-    var qsum = 0
-    blueprints.forEach {
-        val res = it.calculate(State(oreRobots = 1, minsLeft = 24))
-        val quality = res * it.id
-        println("${it} -> ${res}, quality ${quality}")
-        it.cache.clear()
-        System.gc()
-        qsum += quality
-    }
-    println("qsum ${qsum}")
+//    part1(blueprints)
+
+    // part 2
+    part2(blueprints)
 }
+
+
+
