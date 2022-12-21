@@ -33,11 +33,10 @@ class DivMonkey(monkey1: String, monkey2: String, cache: Map<String, MathMonkey>
     override fun getNumber(): Long = cache[monkey1]!!.getNumber() / cache[monkey2]!!.getNumber()
 }
 
-fun main() {
-    val input = loadFromResources("day21.txt").readLines().map {
-        it.split(":\\s*".toRegex())
-    }
-    val cache = mutableMapOf<String, MathMonkey>()
+private fun part1(
+    input: List<List<String>>,
+    cache: MutableMap<String, MathMonkey>
+) {
     input.forEach { (name, def) ->
         val monkey =
             if (def.all { it.isDigit() }) {
@@ -61,3 +60,12 @@ fun main() {
     }
     println(cache["root"]!!.getNumber())
 }
+
+fun main() {
+    val input = loadFromResources("day21.txt").readLines().map {
+        it.split(":\\s*".toRegex())
+    }
+    val cache = mutableMapOf<String, MathMonkey>()
+    part1(input, cache)
+}
+
