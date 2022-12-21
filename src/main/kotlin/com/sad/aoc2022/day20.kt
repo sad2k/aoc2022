@@ -1,11 +1,6 @@
 package com.sad.aoc2022
 
-fun main() {
-    val input = loadFromResources("day20.txt").readLines().map(String::toInt).mapIndexed { idx, it ->
-        it to idx
-    }
-
-    // part 1
+fun part1(input: List<Pair<Int, Int>>) {
     val list = input.toMutableList()
     val indexes = mutableMapOf<Int, Int>()
     list.forEach { (_, i) ->
@@ -15,11 +10,11 @@ fun main() {
     for (i in list.indices) {
         val idx = indexes[i]!!
         val (v, _) = list[idx]
-        var newPos = (idx + v) % (list.size-1)
+        var newPos = (idx + v) % (list.size - 1)
         if (newPos < 0) {
             newPos += list.size - 1
         }
-        println("${v} moves from ${idx} to ${newPos}")
+//        println("${v} moves from ${idx} to ${newPos}")
         if (idx != newPos) {
             indexes[i] = newPos
             if (newPos < idx) {
@@ -53,5 +48,14 @@ fun main() {
             break
         }
     }
-
 }
+
+fun main() {
+    val input = loadFromResources("day20.txt").readLines().map(String::toInt).mapIndexed { idx, it ->
+        it to idx
+    }
+
+    // part 1
+//    part1(input)
+}
+
