@@ -65,6 +65,6 @@ fun main() {
     val input = loadFromResources("day21.txt").readLines().map {
         it.split(":\\s*".toRegex())
     }
-    part1(input, cache)
+    part1(input)
 }
 
