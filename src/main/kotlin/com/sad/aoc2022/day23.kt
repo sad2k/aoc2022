@@ -72,28 +72,6 @@ private fun findBoundaries(coords: List<Pair<Int, Int>>): Pair<Pair<Int, Int>, P
     return Pair(Pair(minRow, minCol), Pair(maxRow, maxCol))
 }
 
-fun main() {
-    val input = loadFromResources("day23.txt").readLines()
-
-    val elfToCoord = mutableMapOf<Int, Pair<Int, Int>>()
-    val coordToElf = mutableMapOf<Pair<Int, Int>, Int>()
-    var elfId = 0
-    for (i in input.indices) {
-        val s = input[i]
-        for (j in s.indices) {
-            if (s[j] == '#') {
-                val coord = i to j
-                elfId++
-                elfToCoord[elfId] = coord
-                coordToElf[coord] = elfId
-            }
-        }
-    }
-
-    // part 1
-    part1(elfToCoord, coordToElf)
-}
-
 private fun part1(
     elfToCoord: MutableMap<Int, Pair<Int, Int>>,
     coordToElf: MutableMap<Pair<Int, Int>, Int>
@@ -155,3 +133,100 @@ private fun part1(
     }
     println("empty ${empty}")
 }
+
+private fun part2(
+    elfToCoord: MutableMap<Int, Pair<Int, Int>>,
+    coordToElf: MutableMap<Pair<Int, Int>, Int>
+) {
+    val coordCheckers = mutableListOf(
+        ::northChecker,
+        ::southChecker,
+        ::westChecker,
+        ::eastChecker
+    )
+    var round = 0
+    while(true) {
+        round++
+        val proposals = mutableMapOf<Pair<Int, Int>, MutableList<Int>>()
+        for ((elf, coord) in elfToCoord.entries) {
+            val (row, col) = coord
+            if (row - 1 to col in coordToElf ||
+                row - 1 to col - 1 in coordToElf ||
+                row - 1 to col + 1 in coordToElf ||
+                row + 1 to col in coordToElf ||
+                row + 1 to col - 1 in coordToElf ||
+                row + 1 to col + 1 in coordToElf ||
+                row to col - 1 in coordToElf ||
+                row to col + 1 in coordToElf
+            ) {
+                for (checker in coordCheckers) {
+                    val newCoord = checker(coord, coordToElf)
+                    if (newCoord != null) {
+                        proposals.computeIfAbsent(newCoord) {
+                            mutableListOf()
+                        }.add(elf)
+                        break
+                    }
+                }
+            }
+        }
+        var moved = false
+        proposals.filter { (_, elfs) -> elfs.size == 1 }.forEach { (coord, elfs) ->
+            val elf = elfs[0]
+            val oldCoord = elfToCoord.remove(elf)!!
+            check(coordToElf.remove(oldCoord) != null)
+            elfToCoord[elf] = coord
+            coordToElf[coord] = elf
+            moved = true
+        }
+
+        coordCheckers.add(coordCheckers.removeAt(0))
+
+        if (!moved) {
+            break
+        }
+    }
+
+    println(round)
+
+//    val (minPair, maxPair) = findBoundaries(coordToElf.keys.toList())
+//    val (minRow, minCol) = minPair
+//    val (maxRow, maxCol) = maxPair
+//    println("min ${minRow},${minCol}")
+//    println("max ${maxRow},${maxCol}")
+//    var empty = 0
+//    for (row in minRow..maxRow) {
+//        for (col in minCol..maxCol) {
+//            if (row to col !in coordToElf) {
+//                empty++
+//            }
+//        }
+//    }
+//    println("empty ${empty}")
+}
+
+fun main() {
+    val input = loadFromResources("day23.txt").readLines()
+
+    val elfToCoord = mutableMapOf<Int, Pair<Int, Int>>()
+    val coordToElf = mutableMapOf<Pair<Int, Int>, Int>()
+    var elfId = 0
+    for (i in input.indices) {
+        val s = input[i]
+        for (j in s.indices) {
+            if (s[j] == '#') {
+                val coord = i to j
+                elfId++
+                elfToCoord[elfId] = coord
+                coordToElf[coord] = elfId
+            }
+        }
+    }
+
+    // part 1
+//    part1(elfToCoord, coordToElf)
+
+    // part 2
+    part2(elfToCoord, coordToElf)
+}
+
