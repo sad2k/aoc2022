@@ -189,20 +189,6 @@ private fun part2(
 
     println(round)
 
-//    val (minPair, maxPair) = findBoundaries(coordToElf.keys.toList())
-//    val (minRow, minCol) = minPair
-//    val (maxRow, maxCol) = maxPair
-//    println("min ${minRow},${minCol}")
-//    println("max ${maxRow},${maxCol}")
-//    var empty = 0
-//    for (row in minRow..maxRow) {
-//        for (col in minCol..maxCol) {
-//            if (row to col !in coordToElf) {
-//                empty++
-//            }
-//        }
-//    }
-//    println("empty ${empty}")
 }
 
 fun main() {
