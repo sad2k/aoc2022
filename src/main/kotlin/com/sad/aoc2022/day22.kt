@@ -129,7 +129,6 @@ private fun part2(
     val colRanges = mutableListOf<Pair<Int, Int>>()
     for (i in map.indices) {
         val s = map[i]
-        println(s)
         val firstCol = s.indexOfAny(charArrayOf('.', '#'))
         val lastCol = s.lastIndexOfAny(charArrayOf('.', '#'))
         colRanges.add(firstCol to lastCol)
@@ -150,11 +149,14 @@ private fun part2(
         }
         rowRanges.add(minRow to maxRow)
     }
+    println("colRanges ${colRanges}")
+    println("rowRanges ${rowRanges}")
     var row = 0
     var col = colRanges[0].first
     println("starting at ${row},${col}")
     var orientation = 'R'
     for (inst in instructions) {
+        println("instruction ${inst}")
         if (inst is Int) {
             for (i in 1..inst) {
                 when (orientation) {
@@ -437,6 +439,137 @@ private fun examplePositionJumpFunction(
     return Triple(newRow, newCol, newOrientation)
 }
 
+private fun testPositionJumpFunction(
+    coord: Pair<Int, Int>,
+    orientation: Char,
+    squares: Map<Int, Pair<Pair<Int, Int>, Pair<Int, Int>>>
+): Triple<Int, Int, Char> {
+    val (row, col) = coord
+    val square = findSquare(row, col, squares)
+    var newRow = -1
+    var newCol = -1
+    var newOrientation = '?'
+    println("jump for ${coord} orient ${orientation}")
+    when (square) {
+        1 -> {
+            when(orientation) {
+                'L' -> {
+                    val rowOffset = row - squares[square]!!.first.first
+                    newRow = squares[4]!!.second.first - rowOffset
+                    newCol = squares[4]!!.first.second
+                    newOrientation = 'R'
+                }
+                'U' -> {
+                    val colOffset = col - squares[square]!!.first.second
+                    newRow = squares[6]!!.first.first + colOffset
+                    newCol = squares[6]!!.first.second
+                    newOrientation = 'R'
+                }
+            }
+        }
+        2 -> {
+            when(orientation) {
+                'U' -> {
+                    val colOffset = col - squares[square]!!.first.second
+                    newCol = squares[6]!!.first.second + colOffset
+                    newRow = squares[6]!!.second.first
+                    newOrientation = 'U'
+                }
+                'D' -> {
+                    val colOffset = col - squares[square]!!.first.second
+                    newRow = squares[3]!!.first.first + colOffset
+                    newCol = squares[3]!!.second.second
+                    newOrientation = 'L'
+                }
+                'R' -> {
+                    val rowOffset = row - squares[square]!!.first.first
+                    newRow = squares[5]!!.second.first - rowOffset
+                    newCol = squares[5]!!.second.second
+                    newOrientation = 'L'
+                }
+            }
+        }
+        3 -> {
+            when(orientation) {
+                'L' -> {
+                    val rowOffset = row - squares[square]!!.first.first
+                    newRow = squares[4]!!.first.first
+                    newCol = squares[4]!!.first.second + rowOffset
+                    newOrientation = 'D'
+                }
+                'R' -> {
+                    val rowOffset = row - squares[square]!!.first.first
+                    newRow = squares[2]!!.second.first
+                    newCol = squares[2]!!.first.second + rowOffset
+                    newOrientation = 'U'
+                }
+            }
+        }
+        4 -> {
+            when(orientation) {
+                'L' -> {
+                    val rowOffset = row - squares[square]!!.first.first
+                    newRow = squares[1]!!.second.first - rowOffset
+                    newCol = squares[1]!!.first.second
+                    newOrientation = 'R'
+                }
+                'U' -> {
+                    val colOffset = col - squares[square]!!.first.second
+                    newRow = squares[3]!!.first.first + colOffset
+                    newCol = squares[3]!!.first.second
+                    newOrientation = 'R'
+                }
+            }
+
+        }
+        5 -> {
+            when(orientation) {
+                'R' -> {
+                    val rowOffset = row - squares[square]!!.first.first
+                    newRow = squares[2]!!.second.first - rowOffset
+                    newCol = squares[2]!!.second.second
+                    newOrientation = 'L'
+                }
+                'D' -> {
+                    val colOffset = col - squares[square]!!.first.second
+                    newRow = squares[6]!!.first.first + colOffset
+                    newCol = squares[6]!!.second.second
+                    newOrientation = 'L'
+                }
+            }
+        }
+        6 -> {
+            when(orientation) {
+                'L' -> {
+                    val rowOffset = row - squares[square]!!.first.first
+                    newRow = squares[1]!!.first.first
+                    newCol = squares[1]!!.first.second + rowOffset
+                    newOrientation = 'D'
+                }
+                'D' -> {
+                    val colOffset = col - squares[square]!!.first.second
+                    newRow = squares[2]!!.first.first
+                    newCol = squares[2]!!.first.second + colOffset
+                    newOrientation = 'D'
+                }
+                'R' -> {
+                    val rowOffset = row - squares[square]!!.first.first
+                    newRow = squares[5]!!.second.first
+                    newCol = squares[5]!!.first.second + rowOffset
+                    newOrientation = 'U'
+                }
+            }
+        }
+    }
+    if (newRow < 0 || newCol < 0 || newOrientation == '?') {
+        throw IllegalArgumentException("coord=${coord} orientation=${orientation}")
+    }
+    val res = Triple(newRow, newCol, newOrientation)
+    println("jump from ${coord} (orient ${orientation} sq ${square}) to ${res}")
+    return res
+
+}
+
 fun main() {
     val input = loadFromResources("day22.txt").readLines().splitWhen { it.isBlank() }
     val map = input[0]
@@ -465,10 +598,10 @@ fun main() {
 //    part1(map, instructions)
 
     // part 1
-    val squares = findSquareBoundaries(map, 4)
+    val squares = findSquareBoundaries(map, 3)
     println(squares)
     part2(map, instructions) { pos, orientation ->
-        examplePositionJumpFunction(pos, orientation, squares)
+        testPositionJumpFunction(pos, orientation, squares)
     }
 }
 
