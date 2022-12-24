@@ -35,10 +35,10 @@ private fun blizzardsAfter(minutes: Int): Set<Coord> {
     return b
 }
 
-private fun bfs(start: Coord, end: Coord): Int {
+private fun bfs(start: Coord, end: Coord, startMin: Int): Int {
     val visited = mutableSetOf<Pair<Coord, Int>>()
     val queue = ArrayDeque<Pair<Coord, Int>>()
-    queue.add(start to 0)
+    queue.add(start to startMin)
     while (!queue.isEmpty()) {
         val (c, t) = queue.removeFirst()
 //        println("c ${c} t ${t}")
@@ -88,7 +88,7 @@ fun main() {
 
     width = input[0].length - 2
     height = input.size - 2
-    println("width=${width} height=${height}")
+//    println("width=${width} height=${height}")
 
     for (i in input.indices) {
         val s = input[i]
@@ -105,13 +105,20 @@ fun main() {
         }
     }
 
-    println(blizzards)
-    println(blizzardsAfter(1))
+//    println(blizzards)
+//    println(blizzardsAfter(1))
 
 //    drawGrove(walls, blizzardsAfter(4))
 
-    println(bfs(0 to 1, input.size - 1 to input[0].length - 2))
+    // part 1
+    val minsFwd = bfs(0 to 1, input.size - 1 to input[0].length - 2, 0)
+    println(minsFwd)
 
+    // part 2
+    val minsBack = bfs( input.size - 1 to input[0].length - 2, 0 to 1, minsFwd)
+    println(minsBack)
+    val minsFwdAgain = bfs( 0 to 1, input.size - 1 to input[0].length - 2, minsBack)
+    println(minsFwdAgain)
 }
 
 
